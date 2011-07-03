@@ -42,7 +42,7 @@ module XMLSecurity
       extract_signed_element_id
     end
 
-    def validate(idp_cert_fingerprint, soft = true)
+    def validate(idp_cert_fingerprint, soft, idp_cert)
       # get cert from response
       base64_cert = self.elements["//ds:X509Certificate"].text
       cert_text   = Base64.decode64(base64_cert)
@@ -54,8 +54,9 @@ module XMLSecurity
       if fingerprint != idp_cert_fingerprint.gsub(/[^a-zA-Z0-9]/,"").downcase
         return soft ? false : (raise Onelogin::Saml::ValidationError.new("Fingerprint mismatch"))
       end
-
-      validate_doc(base64_cert, soft)
+      
+      status = Xmlsec.verify_file(self.to_s, idp_cert.to_pem)
+      return status == 1
     end
 
     def validate_doc(base64_cert, soft = true)
