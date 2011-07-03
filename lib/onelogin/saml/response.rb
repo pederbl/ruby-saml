@@ -34,6 +34,11 @@ module Onelogin::Saml
       end
     end
 
+    def session_index
+      node = REXML::XPath.first(document, "/p:Response/a:Assertion[@ID='#{document.signed_element_id[1,document.signed_element_id.size]}']/a:AuthnStatement", { "p" => PROTOCOL, "a" => ASSERTION })
+      node.attributes["SessionIndex"].inspect
+    end
+
     # A hash of alle the attributes with the response. Assuming there is only one value for each key
     def attributes
       @attr_statements ||= begin
